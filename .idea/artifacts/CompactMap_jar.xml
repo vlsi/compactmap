@@ -2,12 +2,13 @@
   <artifact type="jar" name="CompactMap:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/CompactMap_jar</output-path>
     <root id="archive" name="compactmap.jar">
-      <element id="module-output" name="CompactMap" />
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
       </element>
       <element id="file-copy" path="$PROJECT_DIR$/COPYING" />
       <element id="file-copy" path="$PROJECT_DIR$/README.md" />
+      <element id="module-output" name="CompactMap" />
+      <element id="file-copy" path="$PROJECT_DIR$/COPYING.LESSER" />
     </root>
   </artifact>
 </component>
