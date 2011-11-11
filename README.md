@@ -61,7 +61,12 @@ This library is distibuted under terms of GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-
+Change log
+----------
+v1.1
+  Fix: #1 containKey returns true on non existing key
+  Fix: #2 size should account removed keys
+  Improvement: #3 Default values should be serialized as map
 
 Author
 ------
