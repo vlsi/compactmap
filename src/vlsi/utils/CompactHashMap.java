@@ -80,7 +80,7 @@ public class CompactHashMap<K, V> implements Map<K, V>, Serializable {
     Object v1, v2, v3;
 
     public int size() {
-        return klass.size();
+        return klass.size(this);
     }
 
     public boolean isEmpty() {

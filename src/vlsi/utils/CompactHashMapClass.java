@@ -145,8 +145,30 @@ public class CompactHashMapClass<K, V> {
         return nextKlass.key2slot.get(key);
     }
 
-    public int size() {
-        return key2slot.size() + defaultValues.size();
+    public int size(CompactHashMap<K, V> map) {
+        return key2slot.size() + defaultValues.size() - removedSlotsCount(map);
+    }
+
+    private int removedSlotsCount(CompactHashMap<K, V> map) {
+        int emptySlots = 0;
+        switch (key2slot.size()) {
+            default: // more than 3
+                for (Object o : (Object[]) map.v1) {
+                    if (o == REMOVED_OBJECT) emptySlots++;
+                }
+                /* fall through */
+            case 3: // v1 is filled after v2
+                if (map.v1 == REMOVED_OBJECT) emptySlots++;
+                /* fall through */
+            case 2: // v2 is filled after v3
+                if (map.v2 == REMOVED_OBJECT) emptySlots++;
+                /* fall through */
+            case 1: // v3 is filled the first
+                if (map.v3 == REMOVED_OBJECT) emptySlots++;
+            case 0:
+        }
+
+        return emptySlots;
     }
 
     public boolean containsKey(CompactHashMap<K, V> map, Object key) {

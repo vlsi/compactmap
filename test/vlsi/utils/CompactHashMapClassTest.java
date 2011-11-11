@@ -145,4 +145,12 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.size(), 2);
         Assert.assertEquals(map.klass.defaultValues.size(), 1);
     }
+    @Test
+    public void removeShouldBeReflectedInSize() {
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("charset", "UTF-8");
+        map.remove("charset");
+        Assert.assertEquals(map.size(), 0);
+        Assert.assertFalse(map.containsKey("charset"));
+    }
 }
