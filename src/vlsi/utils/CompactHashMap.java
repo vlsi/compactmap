@@ -135,26 +135,10 @@ public class CompactHashMap<K, V> implements Map<K, V>, Serializable {
     }
 
     private void writeObject(java.io.ObjectOutputStream s) throws IOException {
-        int size = size();
-        s.writeInt(size);
-
-        if (size == 0) return;
-
-        for (Entry<K, V> entry : entrySet()) {
-            s.writeObject(entry.getKey());
-            s.writeObject(entry.getValue());
-        }
+        klass.serialize(this, s);
     }
 
     private void readObject(java.io.ObjectInputStream s) throws IOException, ClassNotFoundException {
-        int size = s.readInt();
-        klass = CompactHashMapClass.EMPTY;
-
-        if (size == 0) return;
-        for (int i = 0; i < size; i++) {
-            K key = (K) s.readObject();
-            V value = (V) s.readObject();
-            put(key, value);
-        }
+        CompactHashMapClass.deserialize(this, s);
     }
 }

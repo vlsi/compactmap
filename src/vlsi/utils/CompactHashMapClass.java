@@ -19,6 +19,9 @@
 
 package vlsi.utils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 public class CompactHashMapClass<K, V> {
@@ -160,6 +163,42 @@ public class CompactHashMapClass<K, V> {
 
     public Set<Map.Entry<K, V>> entrySet(CompactHashMap<K, V> map) {
         return new CompactHashMapClass.EntrySet<K, V>(map);
+    }
+
+    public void serialize(CompactHashMap<K, V> map, ObjectOutputStream s) throws IOException {
+        // We serialize default and non default values separately
+        // That makes serialized representation more compact when several maps share defaults
+        int size = key2slot.size() - removedSlotsCount(map);
+        s.writeInt(size);
+
+        if (size > 0)
+            for (Map.Entry<K, Integer> entry : key2slot.entrySet()) {
+                Object value = getValueFromSlot(map, entry.getValue());
+                if (value == REMOVED_OBJECT) continue;
+                s.writeObject(entry.getKey());
+                s.writeObject(value);
+            }
+
+        // Serialize default values as separate map
+        s.writeObject(defaultValues);
+    }
+
+    public static <K, V> void deserialize(CompactHashMap<K, V> map, ObjectInputStream s) throws IOException, ClassNotFoundException {
+        int size = s.readInt();
+        map.klass = CompactHashMapClass.EMPTY;
+
+        for (int i = 0; i < size; i++) {
+            K key = (K) s.readObject();
+            V value = (V) s.readObject();
+            map.put(key, value);
+        }
+
+        Map<K, V> defaults = (Map<K, V>) s.readObject();
+        // TODO: optimize to CompactHashMapClassEmptyDefaults.getNewDefaultClass
+        // Current implementation of getNewDefaultClass relies on identity equality, thus it does not fit
+        for (Map.Entry<K, V> entry : defaults.entrySet()) {
+            map.put(entry.getKey(), entry.getValue());
+        }
     }
 
     static class KeySet<K, V> extends AbstractSet<K> {
