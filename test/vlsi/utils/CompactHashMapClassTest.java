@@ -23,6 +23,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.*;
+
 public class CompactHashMapClassTest {
     @BeforeMethod
     public void clearDefaults() {
@@ -145,6 +147,15 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.size(), 2);
         Assert.assertEquals(map.klass.defaultValues.size(), 1);
     }
+
+    @Test
+    public void containsKeyOnNonExistingKey() {
+        CompactHashMapDefaultValues.add("k1", "v1");
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        Assert.assertFalse(map.containsKey("abcd"));
+        Assert.assertFalse(map.containsKey("k1"));
+    }
+
     @Test
     public void removeShouldBeReflectedInSize() {
         CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
@@ -152,5 +163,51 @@ public class CompactHashMapClassTest {
         map.remove("charset");
         Assert.assertEquals(map.size(), 0);
         Assert.assertFalse(map.containsKey("charset"));
+    }
+
+    @Test
+    public void cmpactHashMapInstanceShouldBeSerializable() throws IOException, ClassNotFoundException {
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("charset", "UTF-8");
+        map.remove("charset");
+        CompactHashMap<String, Object> deserialized = serialize(map);
+        Assert.assertEquals(deserialized.size(), 0);
+        Assert.assertFalse(deserialized.containsKey("charset"));
+    }
+
+    private CompactHashMap<String, Object> serialize(CompactHashMap<String, Object> map) throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(map);
+        oos.close();
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+        return (CompactHashMap<String, Object>) ois.readObject();
+    }
+
+    @Test
+    public void defaultValuesAreDeserialized() throws IOException, ClassNotFoundException {
+        CompactHashMapDefaultValues.add("k1", "v1");
+        CompactHashMapDefaultValues.add("k2", "v2");
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("k1", "v1");
+        map.put("k2", "v2");
+
+        CompactHashMap<String, Object> deserialized = serialize(map);
+        Assert.assertEquals(deserialized.size(), 2);
+        Assert.assertEquals(deserialized.get("k1"), "v1");
+        Assert.assertEquals(deserialized.get("k2"), "v2");
+    }
+
+    @Test
+    public void defaultAndRegularValuesAreDeserialized() throws IOException, ClassNotFoundException {
+        CompactHashMapDefaultValues.add("k1", "v1");
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("k1", "v1");
+        map.put("k2", "v2");
+
+        CompactHashMap<String, Object> deserialized = serialize(map);
+        Assert.assertEquals(deserialized.size(), 2);
+        Assert.assertEquals(deserialized.get("k1"), "v1");
+        Assert.assertEquals(deserialized.get("k2"), "v2");
     }
 }

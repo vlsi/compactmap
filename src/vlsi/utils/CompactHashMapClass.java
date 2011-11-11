@@ -172,7 +172,13 @@ public class CompactHashMapClass<K, V> {
     }
 
     public boolean containsKey(CompactHashMap<K, V> map, Object key) {
-        return getInternal(map, key) != REMOVED_OBJECT;
+        // We cannot use plain getInternal here since we will be unable to distinguish
+        // existing, but null default value
+        final Integer slot = key2slot.get(key);
+        if (slot == null)
+            return defaultValues.containsKey(key);
+
+        return getValueFromSlot(map, slot) != REMOVED_OBJECT;
     }
 
     public Set<K> keySet(CompactHashMap<K, V> map) {
