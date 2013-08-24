@@ -210,4 +210,21 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(deserialized.get("k1"), "v1");
         Assert.assertEquals(deserialized.get("k2"), "v2");
     }
+
+    @Test
+    public void putNullWorks() {
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("k1", null);
+        Assert.assertEquals(map.size(), 1);
+        Assert.assertEquals(map.get("k1"), null);
+    }
+
+    @Test
+    public void deleteNullWorks() {
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("k1", null);
+        map.remove("k1");
+        Assert.assertEquals(map.size(), 0);
+        Assert.assertEquals(map.get("k1"), null);
+    }
 }
