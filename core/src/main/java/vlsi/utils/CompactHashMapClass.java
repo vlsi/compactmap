@@ -19,15 +19,18 @@
 
 package vlsi.utils;
 
+import com.github.andrewoma.dexx.collection.Pair;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
 public class CompactHashMapClass<K, V> {
-    public static final CompactHashMapClass EMPTY = new CompactHashMapClassEmptyDefaults(Collections.emptyMap());
+    public static final CompactHashMapClass EMPTY = new CompactHashMapClassEmptyDefaults(
+            new com.github.andrewoma.dexx.collection.HashMap());
 
-    final Map<K, Integer> key2slot; // Immutable
+    final com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot; // Immutable
     final Map<K, V> defaultValues; // Immutable
 
     // Reference to the map with defaultValues == emptyMap
@@ -37,13 +40,13 @@ public class CompactHashMapClass<K, V> {
     // "new String" is required to avoid clashing with regular strings
     public static final String[] REMOVED_OBJECT = new String[]{"Non existing mapping value"};
 
-    public CompactHashMapClass(Map<K, Integer> key2slot, Map<K, V> defaultValues, CompactHashMapClassEmptyDefaults<K, V> mapWithEmptyDefaults) {
+    public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot, Map<K, V> defaultValues, CompactHashMapClassEmptyDefaults<K, V> mapWithEmptyDefaults) {
         this.key2slot = key2slot;
         this.defaultValues = defaultValues;
         this.mapWithEmptyDefaults = mapWithEmptyDefaults;
     }
 
-    public CompactHashMapClass(Map<K, Integer> key2slot) {
+    public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot) {
         this.key2slot = key2slot;
         this.defaultValues = Collections.emptyMap();
         this.mapWithEmptyDefaults = (CompactHashMapClassEmptyDefaults<K, V>) this;
@@ -55,7 +58,7 @@ public class CompactHashMapClass<K, V> {
     }
 
     private Object getInternal(CompactHashMap<K, V> map, Object key) {
-        final Integer slot = key2slot.get(key);
+        final Integer slot = key2slot.get((K) key);
         if (slot == null)
             return defaultValues.get(key);
 
@@ -129,14 +132,16 @@ public class CompactHashMapClass<K, V> {
 
         if (prevSize == 3) {
             // Array length should be odd to play well with 8 byte alignment of object size
-            //  2 refs (object header) + 1 int (array length) + n*length refs (contents)
-            Object[] array = new Object[5];
+            //  1.5 refs (object header) + 1 int (array length) + n*length refs (contents)
+            Object[] array = new Object[4];
             array[0] = map.v1;
             map.v1 = array;
         } else if (prevSize > 3) {
             Object[] array = (Object[]) map.v1;
             if (array.length < prevSize - 1) {
-                Object[] newArray = new Object[array.length * 2 + 1]; // length should be odd
+                int newSize = array.length * 3 / 2;
+                newSize += newSize & 1; // If odd, round to next even
+                Object[] newArray = new Object[newSize];
                 System.arraycopy(array, 0, newArray, 0, array.length);
                 map.v1 = newArray;
             }
@@ -174,7 +179,7 @@ public class CompactHashMapClass<K, V> {
     public boolean containsKey(CompactHashMap<K, V> map, Object key) {
         // We cannot use plain getInternal here since we will be unable to distinguish
         // existing, but null default value
-        final Integer slot = key2slot.get(key);
+        final Integer slot = key2slot.get((K) key);
         if (slot == null)
             return defaultValues.containsKey(key);
 
@@ -193,17 +198,17 @@ public class CompactHashMapClass<K, V> {
         return new CompactHashMapClass.EntrySet<K, V>(map);
     }
 
-    public void serialize(CompactHashMap<K, V> map, ObjectOutputStream s) throws IOException {
+    public void serialize(final CompactHashMap<K, V> map, final ObjectOutputStream s) throws IOException {
         // We serialize default and non default values separately
         // That makes serialized representation more compact when several maps share defaults
         int size = key2slot.size() - removedSlotsCount(map);
         s.writeInt(size);
 
         if (size > 0)
-            for (Map.Entry<K, Integer> entry : key2slot.entrySet()) {
-                Object value = getValueFromSlot(map, entry.getValue());
+            for (Pair<K, Integer> entry : key2slot) {
+                Object value = getValueFromSlot(map, entry.component2());
                 if (value == REMOVED_OBJECT) continue;
-                s.writeObject(entry.getKey());
+                s.writeObject(entry.component1());
                 s.writeObject(value);
             }
 
@@ -343,7 +348,7 @@ public class CompactHashMapClass<K, V> {
         private void advance() {
             if (!it.hasNext() && defValues) {
                 defValues = false;
-                it = map.klass.key2slot.entrySet().iterator();
+                it = map.klass.key2slot.asMap().entrySet().iterator();
             }
 
             if (!it.hasNext()) {

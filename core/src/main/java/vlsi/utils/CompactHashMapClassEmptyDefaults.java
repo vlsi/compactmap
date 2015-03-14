@@ -19,6 +19,9 @@
 
 package vlsi.utils;
 
+import com.github.andrewoma.dexx.collection.Pair;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -35,7 +38,7 @@ public class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<
     Map<K, CompactHashMapClassEmptyDefaults<K, V>> key2newKlass;
     Map<Map<K, V>, CompactHashMapClass<K, V>> defValues2Klass;
 
-    public CompactHashMapClassEmptyDefaults(Map<K, Integer> newKey2slot) {
+    public CompactHashMapClassEmptyDefaults(com.github.andrewoma.dexx.collection.Map<K, Integer> newKey2slot) {
         super(newKey2slot);
     }
 
@@ -62,9 +65,7 @@ public class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<
         CompactHashMapClassEmptyDefaults<K, V> newKlass = null;
         synchronized (this) {
             Map<K, CompactHashMapClassEmptyDefaults<K, V>> key2newKlass = this.key2newKlass;
-            if (key2newKlass == null)
-                this.key2newKlass = new HashMap<K, CompactHashMapClassEmptyDefaults<K, V>>();
-            else
+            if (key2newKlass != null)
                 newKlass = key2newKlass.get(key);
         }
 
@@ -75,28 +76,35 @@ public class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<
             return newKlass.getNewDefaultClass(defaultValues);
 
         int size = key2slot.size();
-        HashMap<K, Integer> newKey2slot = new HashMap<K, Integer>(size + 1, 1f);
-        newKey2slot.putAll(key2slot);
+        com.github.andrewoma.dexx.collection.Map<K, Integer> newKey2slot = key2slot;
 
         if (size < 3) size -= 3;
         else if (size == 3) {
             size = 1;
-            for (Map.Entry<K, Integer> entry : newKey2slot.entrySet())
-                if (entry.getValue() == -1) {
-                    entry.setValue(0);
+            for (Pair<K, Integer> entry : key2slot)
+                if (entry.component2() == -1) {
+                    newKey2slot = newKey2slot.put(entry.component1(), 0);
                     break;
                 }
         } else size -= 2;
-        newKey2slot.put(key, size);
+        newKey2slot = newKey2slot.put(key, size);
 
         newKlass = new CompactHashMapClassEmptyDefaults<K, V>(newKey2slot);
         synchronized (this) {
-            final CompactHashMapClassEmptyDefaults<K, V> anotherNewKlass = key2newKlass.get(key);
+            if (key2newKlass == null) {
+                key2newKlass = Collections.singletonMap(key, newKlass);
+            } else {
+                final CompactHashMapClassEmptyDefaults<K, V> anotherNewKlass = key2newKlass.get(key);
 
-            if (anotherNewKlass != null)
-                newKlass = anotherNewKlass;
-            else
-                key2newKlass.put(key, newKlass);
+                if (anotherNewKlass != null)
+                    newKlass = anotherNewKlass;
+                else {
+                    if (key2newKlass.size() == 1) {
+                        key2newKlass = new HashMap<K, CompactHashMapClassEmptyDefaults<K, V>>(key2newKlass);
+                    }
+                    key2newKlass.put(key, newKlass);
+                }
+            }
         }
 
         return newKlass.getNewDefaultClass(defaultValues);

@@ -11,6 +11,7 @@
     <modules>
         <module>core</module>
         <module>jol</module>
+        <module>jmh</module>
     </modules>
 
     <properties>
@@ -62,6 +63,18 @@
                 <groupId>com.github.andrewoma.dexx</groupId>
                 <artifactId>dexx-collections</artifactId>
                 <version>0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pcollections</groupId>
+                <artifactId>pcollections</artifactId>
+                <version>2.1.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.krukow</groupId>
+                <artifactId>clj-ds</artifactId>
+                <version>0.0.4</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.openjdk.jol</groupId>

@@ -10,18 +10,21 @@ http://code.google.com/apis/v8/design.html#prop_access.
 This implementation however can store specific key-value pairs out of the map,
 so they do not consume memory when repeated in different maps.
 
-The expected memory consumption (32 bit jvm) is as follows:
+The expected memory consumption (8u40, 64 bit, compressed references) is as follows:
+    # of elements  CompactHashMap  HashMap (with 1.0 fillFactor)
+                0              32       48
+                1              32      104
+                2              32      136
+                3              32      176
+                4              64      208
+                5              64      256
+                6              64      288
+                7              72      320
+                8              72      352
 
-	# of elements  CompactHashMap  HashMap (with 1.0 fillFactor)
-	            0              24       52
-	            1              24       80
-	            2              24      112
-	            3              24      136
-	            4              56      168
-	            5              56      192
-	            6              56      224
-	            7              56      248
-	            8              80      280
+  In other words, the first three non default values consume the same
+   32 bytes, then map grows as 32 + 16 + 4 * (n-2) == 40 + 4 * n.
+   Regular HashMap grows as 64 + 36 * n.
 
 The runtime of put and get is constant.
 The expected runtime is as follows (measured in hashmap and array accesses): 
@@ -63,6 +66,11 @@ or (at your option) any later version.
 
 Change log
 ----------
+v1.2.0
+  Improvement: reduce size of hidden classes by using persistent dexx-collections.
+  Improvement: mavenize build
+  Switch to semantic versioning
+
 v1.1
   Fix: #1 containKey returns true on non existing key
   Fix: #2 size should account removed keys

@@ -21,7 +21,9 @@ package vlsi.utils;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Hash table implementation modelled after memory efficient
@@ -42,21 +44,21 @@ import java.util.*;
  * put    1 hashmap + 1 array    6 hashmap
  * </p>
  *
- * <p>The expected memory consumption (32 bit) is as follows:
+ * <p>The expected memory consumption (8u40, 64 bit, compressed references) is as follows:
  *   # of elements  CompactHashMap  HashMap (with 1.0 fillFactor)
- *               0              24       52
- *               1              24       80
- *               2              24      112
- *               3              24      136
- *               4              56      168
- *               5              56      192
- *               6              56      224
- *               7              56      248
- *               8              80      280
+ *               0              32       48
+ *               1              32      104
+ *               2              32      136
+ *               3              32      176
+ *               4              64      208
+ *               5              64      256
+ *               6              64      288
+ *               7              72      320
+ *               8              72      352
  *
  *  In other words, the first three non default values consume the same
- *  24 bytes, then map grows as 28 + 4*n == 44 + 4*(n-4).
- *  Regular HashMap grows as 52 + 28*n.
+ *  32 bytes, then map grows as 32 + 16 + 4 * (n-2) == 40 + 4 * n.
+ *  Regular HashMap grows as 64 + 36 * n.
  * </p>
  *
  *
