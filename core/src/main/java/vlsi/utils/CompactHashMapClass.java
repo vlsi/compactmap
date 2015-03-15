@@ -38,7 +38,7 @@ public class CompactHashMapClass<K, V> {
 
     // This value is used as a marker of deleted object
     // "new String" is required to avoid clashing with regular strings
-    public static final String[] REMOVED_OBJECT = new String[]{"Non existing mapping value"};
+    public static final String REMOVED_OBJECT = new String("Non existing mapping value");
 
     public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot, Map<K, V> defaultValues, CompactHashMapClassEmptyDefaults<K, V> mapWithEmptyDefaults) {
         this.key2slot = key2slot;
