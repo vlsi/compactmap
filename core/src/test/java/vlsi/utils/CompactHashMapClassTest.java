@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.*;
+import java.util.Map;
 
 public class CompactHashMapClassTest {
     @BeforeMethod
@@ -226,5 +227,25 @@ public class CompactHashMapClassTest {
         map.remove("k1");
         Assert.assertEquals(map.size(), 0);
         Assert.assertEquals(map.get("k1"), null);
+    }
+
+    @Test
+    public void deleteFromEntrySet() {
+        CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
+        map.put("k1", "v1");
+        Assert.assertTrue(map.entrySet().remove(new Map.Entry() {
+            public Object getKey() {
+                return "k1";
+            }
+
+            public Object getValue() {
+                return "v1";
+            }
+
+            public Object setValue(Object value) {
+                return null;
+            }
+        }), "entry was removed");
+        Assert.assertEquals(map.size(), 0);
     }
 }

@@ -312,7 +312,10 @@ abstract class CompactHashMapClass<K, V> {
 
         @Override
         public boolean remove(Object o) {
-            return map.remove(o) != null; // TODO: support null as "previous" value
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<K, V> e = (Map.Entry<K, V>) o;
+            return map.remove(e.getKey()) != null; // TODO: support "return true" when value was null
         }
 
         @Override
