@@ -26,31 +26,25 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
-public class CompactHashMapClass<K, V> {
+abstract class CompactHashMapClass<K, V> {
     public static final CompactHashMapClass EMPTY = new CompactHashMapClassEmptyDefaults(
             new com.github.andrewoma.dexx.collection.HashMap());
 
     final com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot; // Immutable
-    final Map<K, V> defaultValues; // Immutable
-
-    // Reference to the map with defaultValues == emptyMap
-    private CompactHashMapClassEmptyDefaults<K, V> mapWithEmptyDefaults;
 
     // This value is used as a marker of deleted object
     // "new String" is required to avoid clashing with regular strings
     public static final String REMOVED_OBJECT = new String("Non existing mapping value");
 
-    public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot, Map<K, V> defaultValues, CompactHashMapClassEmptyDefaults<K, V> mapWithEmptyDefaults) {
-        this.key2slot = key2slot;
-        this.defaultValues = defaultValues;
-        this.mapWithEmptyDefaults = mapWithEmptyDefaults;
-    }
-
     public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot) {
         this.key2slot = key2slot;
-        this.defaultValues = Collections.emptyMap();
-        this.mapWithEmptyDefaults = (CompactHashMapClassEmptyDefaults<K, V>) this;
     }
+
+    protected Map<K, V> getDefaultValues() {
+        return Collections.emptyMap();
+    }
+
+    protected abstract CompactHashMapClassEmptyDefaults<K, V> getMapWithEmptyDefaults();
 
     public V get(CompactHashMap<K, V> map, K key) {
         Object result = getInternal(map, key);
@@ -60,7 +54,7 @@ public class CompactHashMapClass<K, V> {
     private Object getInternal(CompactHashMap<K, V> map, Object key) {
         final Integer slot = key2slot.get((K) key);
         if (slot == null)
-            return defaultValues.get(key);
+            return getDefaultValues().get(key);
 
         return getValueFromSlot(map, slot);
     }
@@ -82,12 +76,12 @@ public class CompactHashMapClass<K, V> {
         Integer slot = key2slot.get(key);
         Object prevValue = REMOVED_OBJECT;
         if (slot == null) {
-            prevValue = defaultValues.get(key);
+            prevValue = getDefaultValues().get(key);
 
             // Try put value as "default"
-            Map<K, V> newDef = CompactHashMapDefaultValues.getNewDefaultValues(defaultValues, key, value);
+            Map<K, V> newDef = CompactHashMapDefaultValues.getNewDefaultValues(getDefaultValues(), key, value);
             if (newDef != null) {
-                map.klass = mapWithEmptyDefaults.getNewDefaultClass(newDef);
+                map.klass = getMapWithEmptyDefaults().getNewDefaultClass(newDef);
                 return (V) prevValue;
             }
 
@@ -125,7 +119,7 @@ public class CompactHashMapClass<K, V> {
     }
 
     private Integer createNewSlot(CompactHashMap<K, V> map, K key) {
-        final CompactHashMapClass<K, V> nextKlass = mapWithEmptyDefaults.getNextKlass(key, defaultValues);
+        final CompactHashMapClass<K, V> nextKlass = getMapWithEmptyDefaults().getNextKlass(key, getDefaultValues());
         map.klass = nextKlass;
 
         int prevSize = key2slot.size();
@@ -151,7 +145,7 @@ public class CompactHashMapClass<K, V> {
     }
 
     public int size(CompactHashMap<K, V> map) {
-        return key2slot.size() + defaultValues.size() - removedSlotsCount(map);
+        return key2slot.size() + getDefaultValues().size() - removedSlotsCount(map);
     }
 
     private int removedSlotsCount(CompactHashMap<K, V> map) {
@@ -181,7 +175,7 @@ public class CompactHashMapClass<K, V> {
         // existing, but null default value
         final Integer slot = key2slot.get((K) key);
         if (slot == null)
-            return defaultValues.containsKey(key);
+            return getDefaultValues().containsKey(key);
 
         return getValueFromSlot(map, slot) != REMOVED_OBJECT;
     }
@@ -213,7 +207,7 @@ public class CompactHashMapClass<K, V> {
             }
 
         // Serialize default values as separate map
-        s.writeObject(defaultValues);
+        s.writeObject(getDefaultValues());
     }
 
     public static <K, V> void deserialize(CompactHashMap<K, V> map, ObjectInputStream s) throws IOException, ClassNotFoundException {
@@ -341,7 +335,7 @@ public class CompactHashMapClass<K, V> {
         public HashIterator(CompactHashMap<K, V> map) {
             this.map = map;
             if (map.isEmpty()) return;
-            this.it = map.klass.defaultValues.entrySet().iterator();
+            this.it = map.klass.getDefaultValues().entrySet().iterator();
             advance();
         }
 

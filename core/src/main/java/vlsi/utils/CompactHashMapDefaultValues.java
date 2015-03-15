@@ -35,7 +35,7 @@ public class CompactHashMapDefaultValues {
     private static Lock readLock = readWriteLock.readLock();
     private static Lock writeLock = readWriteLock.writeLock();
 
-    public static final String[] ALL_VALUES_MATCH = new String[]{"All values match"};
+    public static final String ALL_VALUES_MATCH = new String("All values match");
 
     public static void clear() {
         writeLock.lock();

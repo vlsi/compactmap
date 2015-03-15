@@ -34,12 +34,17 @@ import java.util.Map;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<K, V> {
-    Map<K, CompactHashMapClassEmptyDefaults<K, V>> key2newKlass;
-    Map<Map<K, V>, CompactHashMapClass<K, V>> defValues2Klass;
+class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<K, V> {
+    private Map<K, CompactHashMapClassEmptyDefaults<K, V>> key2newKlass;
+    private Map<Map<K, V>, CompactHashMapClass<K, V>> defValues2Klass;
 
-    public CompactHashMapClassEmptyDefaults(com.github.andrewoma.dexx.collection.Map<K, Integer> newKey2slot) {
-        super(newKey2slot);
+    public CompactHashMapClassEmptyDefaults(com.github.andrewoma.dexx.collection.Map<K, Integer> key2Slot) {
+        super(key2Slot);
+    }
+
+    @Override
+    protected CompactHashMapClassEmptyDefaults<K, V> getMapWithEmptyDefaults() {
+        return this;
     }
 
     protected CompactHashMapClass<K, V> getNewDefaultClass(Map<K, V> newDef) {
@@ -54,7 +59,7 @@ public class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<
 
             newClass = defValues2Klass.get(newDef);
             if (newClass == null) {
-                newClass = new CompactHashMapClass<K, V>(key2slot, newDef, this);
+                newClass = new CompactHashMapClassWithDefaults<K, V>(key2slot, newDef, this);
                 defValues2Klass.put(newDef, newClass);
             }
         }

@@ -44,7 +44,7 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.put("test", "abc"), null);
         Assert.assertEquals(map.get("test"), "abc");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class CompactHashMapClassTest {
         for (int i = 0; i < 20; i++) {
             Assert.assertEquals(map.put("k" + i, "v" + i), null);
             Assert.assertEquals(map.size(), i + 1);
-            Assert.assertEquals(map.klass.defaultValues.size(), 0);
+            Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
             for (int j = 0; j < i; j++) {
                 Assert.assertEquals(map.get("k" + j), "v" + j);
             }
@@ -68,14 +68,14 @@ public class CompactHashMapClassTest {
         for (int i = 0; i < SIZE; i++) {
             Assert.assertEquals(map.put("k" + i, "v" + i), null);
             Assert.assertEquals(map.size(), i + 1);
-            Assert.assertEquals(map.klass.defaultValues.size(), i >= 1 ? 1 : 0);
+            Assert.assertEquals(map.klass.getDefaultValues().size(), i >= 1 ? 1 : 0);
             for (int j = 0; j < i; j++) {
                 Assert.assertEquals(map.get("k" + j), "v" + j);
             }
         }
         Assert.assertEquals(map.remove("k1"), "v1");
         Assert.assertEquals(map.size(), SIZE - 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
     }
 
     @Test
@@ -86,17 +86,17 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.put("default", "a"), null);
         Assert.assertEquals(map.get("default"), "a");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
 
         Assert.assertEquals(map.put("default", "b"), "a");
         Assert.assertEquals(map.get("default"), "b");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
 
         Assert.assertEquals(map.putOrRemove("default", CompactHashMapClass.REMOVED_OBJECT), "b");
         Assert.assertEquals(map.get("default"), null);
         Assert.assertEquals(map.size(), 0);
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
     }
 
     @Test
@@ -106,22 +106,22 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.put("test", "testDefaultValue"), null);
         Assert.assertEquals(map.get("test"), "testDefaultValue");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
 
         Assert.assertEquals(map.put("test", "non-default"), "testDefaultValue");
         Assert.assertEquals(map.get("test"), "non-default");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
 
         Assert.assertEquals(map.put("test", "testDefaultValue"), "non-default");
         Assert.assertEquals(map.get("test"), "testDefaultValue");
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
 
         Assert.assertEquals(map.putOrRemove("test", CompactHashMapClass.REMOVED_OBJECT), "testDefaultValue");
         Assert.assertEquals(map.get("test"), null);
         Assert.assertTrue(map.size() == 0 || map.size() == 1); // we allow to count deleted objects in size
-        Assert.assertEquals(map.klass.defaultValues.size(), 0);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 0);
     }
 
     @Test
@@ -133,19 +133,19 @@ public class CompactHashMapClassTest {
         Assert.assertEquals(map.get("default"), "x");
         Assert.assertEquals(map.get("qwer"), null);
         Assert.assertEquals(map.size(), 1);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
 
         Assert.assertEquals(map.put("qwer", "b"), null);
         Assert.assertEquals(map.get("default"), "x");
         Assert.assertEquals(map.get("qwer"), "b");
         Assert.assertEquals(map.size(), 2);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
 
         Assert.assertEquals(map.put("default", "y"), "x");
         Assert.assertEquals(map.get("default"), "y");
         Assert.assertEquals(map.get("qwer"), "b");
         Assert.assertEquals(map.size(), 2);
-        Assert.assertEquals(map.klass.defaultValues.size(), 1);
+        Assert.assertEquals(map.klass.getDefaultValues().size(), 1);
     }
 
     @Test
