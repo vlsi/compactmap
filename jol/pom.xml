@@ -12,10 +12,12 @@
     <artifactId>jol</artifactId>
     <packaging>jar</packaging>
 
+    <name>Compact HashMap layout/size tests</name>
+
     <dependencies>
         <dependency>
             <groupId>com.github.vlsi.compactmap</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>compactmap</artifactId>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jol</groupId>

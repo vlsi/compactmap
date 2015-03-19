@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <version>1.3.0-SNAPSHOT</version>
     <modules>
-        <module>core</module>
+        <module>compactmap</module>
         <module>jol</module>
         <module>jmh</module>
     </modules>
@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <name>Compact HashMap</name>
+    <name>Compact HashMap parent</name>
     <description>Hash table implementation modelled after memory efficient V8's Fast Property Access</description>
     <licenses>
         <license>
@@ -56,7 +56,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.github.vlsi.compactmap</groupId>
-                <artifactId>core</artifactId>
+                <artifactId>compactmap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
