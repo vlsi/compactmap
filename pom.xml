@@ -30,8 +30,8 @@
     <url>https://github.com/vlsi/compactmap</url>
     <scm>
         <url>https://github.com/vlsi/compactmap</url>
-        <connection>https://github.com/vlsi/compactmap.git</connection>
-        <developerConnection>git@github:vlsi/compactmap</developerConnection>
+        <connection>scm:git:https://github.com/vlsi/compactmap.git</connection>
+        <developerConnection>scm:git:https://github.com/vlsi/compactmap.git</developerConnection>
     </scm>
 
     <developers>
