@@ -26,6 +26,7 @@ This implementation however can store specific key-value pairs out of the map,
 so they do not consume memory when repeated in different maps.
 
 The expected memory consumption (8u40, 64 bit, compressed references) is as follows:
+
     # of elements  CompactHashMap  HashMap (with 1.0 fillFactor)
                 0              32       48
                 1              32      104
