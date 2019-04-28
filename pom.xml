@@ -14,6 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javac.target>1.5</javac.target>
     </properties>
 
     <name>Compact HashMap parent</name>
@@ -109,8 +110,8 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>${javac.target}</source>
+                        <target>${javac.target}</target>
                     </configuration>
                 </plugin>
                 <plugin>

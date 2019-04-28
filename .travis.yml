@@ -2,6 +2,23 @@ sudo: false
 language: java
 dist: trusty
 
-jdk:
-  - oraclejdk8
-  - oraclejdk11
+before_cache:
+  # No sense in caching current build artifacts
+  rm -rf $HOME/.m2/repository/com/github/vlsi
+
+install:
+  - mvn -Djavac.target=$TRGT install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  - mvn -Djavac.target=$TRGT test -B
+
+matrix:
+  include:
+  - jdk: oraclejdk8
+    env:
+    - JDK=8
+    - TRGT=1.5
+  - jdk: oraclejdk11
+    env:
+    - JDK=11
+    - TRGT=1.6
