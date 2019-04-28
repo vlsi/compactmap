@@ -19,15 +19,17 @@
 
 package vlsi.utils;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class CompactHashMapClassTest {
-    @BeforeMethod
+    @Before
     public void clearDefaults() {
         CompactHashMapDefaultValues.clear();
     }
@@ -233,7 +235,7 @@ public class CompactHashMapClassTest {
     public void deleteFromEntrySet() {
         CompactHashMap<String, Object> map = new CompactHashMap<String, Object>();
         map.put("k1", "v1");
-        Assert.assertTrue(map.entrySet().remove(new Map.Entry() {
+        Assert.assertTrue("entry was removed", map.entrySet().remove(new Map.Entry() {
             public Object getKey() {
                 return "k1";
             }
@@ -245,7 +247,7 @@ public class CompactHashMapClassTest {
             public Object setValue(Object value) {
                 return null;
             }
-        }), "entry was removed");
+        }));
         Assert.assertEquals(map.size(), 0);
     }
 }

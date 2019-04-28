@@ -36,8 +36,19 @@ abstract class CompactHashMapClass<K, V> {
     // "new String" is required to avoid clashing with regular strings
     public static final String REMOVED_OBJECT = new String("Non existing mapping value");
 
+    // dexx does not support null, so we wrap null
+    private static final Object NULL = new Object();
+
     public CompactHashMapClass(com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot) {
         this.key2slot = key2slot;
+    }
+
+    private K maskNull(K key) {
+        return key == null ? (K) NULL : key;
+    }
+
+    private K unmaskNull(K key) {
+        return key == NULL ? null : key;
     }
 
     protected Map<K, V> getDefaultValues() {
@@ -52,9 +63,10 @@ abstract class CompactHashMapClass<K, V> {
     }
 
     private Object getInternal(CompactHashMap<K, V> map, Object key) {
-        final Integer slot = key2slot.get((K) key);
+        K nonNullKey = maskNull((K) key);
+        final Integer slot = key2slot.get(nonNullKey);
         if (slot == null)
-            return getDefaultValues().get(key);
+            return getDefaultValues().get(nonNullKey);
 
         return getValueFromSlot(map, slot);
     }
@@ -73,13 +85,14 @@ abstract class CompactHashMapClass<K, V> {
     }
 
     public V put(CompactHashMap<K, V> map, K key, Object value) {
-        Integer slot = key2slot.get(key);
+        K nonNullKey = maskNull(key);
+        Integer slot = key2slot.get(nonNullKey);
         Object prevValue = REMOVED_OBJECT;
         if (slot == null) {
-            prevValue = getDefaultValues().get(key);
+            prevValue = getDefaultValues().get(nonNullKey);
 
             // Try put value as "default"
-            Map<K, V> newDef = CompactHashMapDefaultValues.getNewDefaultValues(getDefaultValues(), key, value);
+            Map<K, V> newDef = CompactHashMapDefaultValues.getNewDefaultValues(getDefaultValues(), nonNullKey, value);
             if (newDef != null) {
                 map.klass = getMapWithEmptyDefaults().getNewDefaultClass(newDef);
                 return (V) prevValue;
@@ -88,7 +101,7 @@ abstract class CompactHashMapClass<K, V> {
             if (value == REMOVED_OBJECT)
                 return (V) prevValue;
             // The value is not default -- put using regular way
-            slot = createNewSlot(map, key);
+            slot = createNewSlot(map, nonNullKey);
         }
 
         switch (slot) {
@@ -173,9 +186,10 @@ abstract class CompactHashMapClass<K, V> {
     public boolean containsKey(CompactHashMap<K, V> map, Object key) {
         // We cannot use plain getInternal here since we will be unable to distinguish
         // existing, but null default value
-        final Integer slot = key2slot.get((K) key);
+        K nonNullKey = maskNull((K) key);
+        final Integer slot = key2slot.get(nonNullKey);
         if (slot == null)
-            return getDefaultValues().containsKey(key);
+            return getDefaultValues().containsKey(nonNullKey);
 
         return getValueFromSlot(map, slot) != REMOVED_OBJECT;
     }
@@ -202,7 +216,7 @@ abstract class CompactHashMapClass<K, V> {
             for (Pair<K, Integer> entry : key2slot) {
                 Object value = getValueFromSlot(map, entry.component2());
                 if (value == REMOVED_OBJECT) continue;
-                s.writeObject(entry.component1());
+                s.writeObject(unmaskNull(entry.component1()));
                 s.writeObject(value);
             }
 
@@ -274,11 +288,6 @@ abstract class CompactHashMapClass<K, V> {
         }
 
         @Override
-        public boolean contains(Object o) {
-            return map.containsValue(o);
-        }
-
-        @Override
         public Iterator<V> iterator() {
             return new ValueIterator<K, V>(map);
         }
@@ -306,8 +315,13 @@ abstract class CompactHashMapClass<K, V> {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<K, V> e = (Map.Entry<K, V>) o;
-            Object mapValue = map.get(e.getKey());
-            return mapValue == e.getValue() || mapValue != null && mapValue.equals(e.getValue());
+            K key = e.getKey();
+            V value = e.getValue();
+            V ourValue = map.get(key);
+            if (value == null) {
+                return ourValue == null && map.containsKey(key);
+            }
+            return value.equals(ourValue);
         }
 
         @Override
@@ -381,7 +395,11 @@ abstract class CompactHashMapClass<K, V> {
         }
 
         public void remove() {
+            if (current == null) {
+                throw new IllegalStateException();
+            }
             map.remove(current.getKey());
+            current = null;
         }
     }
 
@@ -428,7 +446,7 @@ abstract class CompactHashMapClass<K, V> {
         }
 
         public K getKey() {
-            return key;
+            return map.klass.unmaskNull(key);
         }
 
         public V getValue() {
@@ -438,6 +456,29 @@ abstract class CompactHashMapClass<K, V> {
         public V setValue(V value) {
             this.value = value;
             return map.put(key, value);
+        }
+
+        private static boolean eq(Object o1, Object o2) {
+            return o1 == null ? o2 == null : o1.equals(o2);
+        }
+
+        public boolean equals(Object o) {
+            if (!(o instanceof Map.Entry)) {
+                return false;
+            }
+            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+
+            return eq(getKey(), e.getKey()) && eq(value, e.getValue());
+        }
+
+        public int hashCode() {
+            return (key == NULL ? 0 : key.hashCode()) ^
+                    (value == null ? 0 : value.hashCode());
+        }
+
+        @Override
+        public String toString() {
+            return map.klass.unmaskNull(key) + "=" + value;
         }
     }
 

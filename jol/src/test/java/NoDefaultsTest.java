@@ -2,24 +2,27 @@ import com.github.andrewoma.dexx.collection.KeyFunction;
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.PersistentHashMap;
 import com.github.krukow.clj_lang.PersistentTreeMap;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.GraphLayout;
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
-import org.testng.annotations.Test;
 import vlsi.utils.CompactHashMap;
 
 import java.util.*;
 
 public class NoDefaultsTest {
-    @Test(enabled = false)
+    @Test
+    @Disabled
     public void emptyCompactMap() {
         Map m = new CompactHashMap();
         System.out.println(ClassLayout.parseClass(m.getClass()).toPrintable(m));
         System.out.println(GraphLayout.parseInstance(m).toPrintable());
     }
 
-    @Test(enabled = false)
+    @Test
+    @Disabled
     public void emptyHashMap() {
         Map m = new HashMap();
         System.out.println(ClassLayout.parseClass(m.getClass()).toPrintable(m));

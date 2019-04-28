@@ -82,6 +82,15 @@ or (at your option) any later version.
 
 Change log
 ----------
+HEAD
+* Improvement: implement null keys
+* Improvement: `Map#toString`
+* Improvement: `Map#hashCode` + `equals`
+* Improvement: `Map.Entry#hashCode` + `equals`
+* Improvement: `Map.Entry#toString`
+* Improvement: `Map#containsValue` (it is slow but it works)
+* Test: use `guava-testlib` for `Map` implementation testing
+
 v1.2.1
 * Improvement: release to Maven Central
 * Improvement: fix EntrySet.remove method

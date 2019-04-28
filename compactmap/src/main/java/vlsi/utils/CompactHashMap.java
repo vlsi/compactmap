@@ -22,6 +22,7 @@ package vlsi.utils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,7 +95,7 @@ public class CompactHashMap<K, V> implements Map<K, V>, Serializable {
     }
 
     public boolean containsValue(Object value) {
-        throw new UnsupportedOperationException();
+        return values().contains(value);
     }
 
     public V get(Object key) {
@@ -134,6 +135,64 @@ public class CompactHashMap<K, V> implements Map<K, V>, Serializable {
 
     public Set<Entry<K, V>> entrySet() {
         return klass.entrySet(this);
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof Map)) {
+            return false;
+        }
+
+        Map<?,?> m = (Map<?,?>) o;
+        if (m.size() != size())
+            return false;
+
+        for (Entry<K, V> e : entrySet()) {
+            K key = e.getKey();
+            V value = e.getValue();
+
+            if (value == null) {
+                if (m.get(key) != null || !m.containsKey(key)) {
+                    return false;
+                }
+            } else {
+                if (!value.equals(m.get(key))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        Iterator<Entry<K, V>> it = entrySet().iterator();
+        if (!it.hasNext())
+            return "{}";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        while (it.hasNext()) {
+            Entry<K, V> e = it.next();
+            K key = e.getKey();
+            V value = e.getValue();
+            sb.append(key).append('=').append(value);
+            sb.append(',').append(' ');
+        }
+        sb.setLength(sb.length() - 2);
+        return sb.append('}').toString();
+    }
+
+    public int hashCode() {
+        int h = 0;
+        for (Entry<K, V> entry : entrySet()) {
+            h += entry.hashCode();
+        }
+        return h;
     }
 
     private void writeObject(java.io.ObjectOutputStream s) throws IOException {

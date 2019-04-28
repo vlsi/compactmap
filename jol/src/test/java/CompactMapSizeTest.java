@@ -1,5 +1,5 @@
+import org.junit.jupiter.api.Test;
 import org.openjdk.jol.info.GraphLayout;
-import org.testng.annotations.Test;
 import vlsi.utils.CompactHashMap;
 
 import java.lang.reflect.Field;
