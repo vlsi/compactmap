@@ -7,13 +7,18 @@ CompactHashMap
 Usage
 -----
 
-Add maven dependency:
+Add Maven dependency:
 ```xml
 <dependency>
     <groupId>com.github.vlsi.compactmap</groupId>
     <artifactId>compactmap</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
 </dependency>
+```
+
+Gradle:
+```kotlin
+compile("com.github.vlsi.compactmap:compactmap:1.3.0")
 ```
 
 About
@@ -82,7 +87,7 @@ or (at your option) any later version.
 
 Change log
 ----------
-HEAD
+v1.3.0
 * Improvement: implement null keys
 * Improvement: `Map#toString`
 * Improvement: `Map#hashCode` + `equals`
