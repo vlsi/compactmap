@@ -6,6 +6,12 @@ before_cache:
   # No sense in caching current build artifacts
   rm -rf $HOME/.m2/repository/com/github/vlsi
 
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
 install:
   - mvn -Djavac.target=$TRGT install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
