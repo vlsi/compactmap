@@ -87,6 +87,9 @@ or (at your option) any later version.
 
 Change log
 ----------
+v2.0:
+* Change license: LGPL 2.0 -> Apache-2.0
+
 v1.3.0
 * Improvement: implement null keys
 * Improvement: `Map#toString`

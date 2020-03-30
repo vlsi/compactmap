@@ -21,8 +21,8 @@
     <description>Hash table implementation modelled after memory efficient V8's Fast Property Access</description>
     <licenses>
         <license>
-            <name>LGPL 3.0 license</name>
-            <url>http://www.opensource.org/licenses/lgpl-3.0.html</url>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
