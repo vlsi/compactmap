@@ -35,8 +35,6 @@
 
 package vlsi.utils;
 
-import com.github.andrewoma.dexx.collection.Pair;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -99,16 +97,7 @@ class CompactHashMapClassEmptyDefaults<K, V> extends CompactHashMapClass<K, V> {
         int size = key2slot.size();
         com.github.andrewoma.dexx.collection.Map<K, Integer> newKey2slot = key2slot;
 
-        if (size < 3) size -= 3;
-        else if (size == 3) {
-            size = 1;
-            for (Pair<K, Integer> entry : key2slot)
-                if (entry.component2() == -1) {
-                    newKey2slot = newKey2slot.put(entry.component1(), 0);
-                    break;
-                }
-        } else size -= 2;
-        newKey2slot = newKey2slot.put(key, size);
+        newKey2slot = newKey2slot.put(key, size - 2);
 
         newKlass = new CompactHashMapClassEmptyDefaults<K, V>(newKey2slot);
         synchronized (this) {

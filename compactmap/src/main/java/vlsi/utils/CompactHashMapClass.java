@@ -27,6 +27,13 @@ abstract class CompactHashMapClass<K, V> {
     public static final CompactHashMapClass EMPTY = new CompactHashMapClassEmptyDefaults(
             new com.github.andrewoma.dexx.collection.HashMap());
 
+    /**
+     * Enum to represent "value was removed" in the serialized representation of the map.
+     */
+    enum RemovedObjectMarker {
+        INSTANCE;
+    }
+
     final com.github.andrewoma.dexx.collection.Map<K, Integer> key2slot; // Immutable
 
     // This value is used as a marker of deleted object
@@ -70,14 +77,16 @@ abstract class CompactHashMapClass<K, V> {
 
     protected static Object getValueFromSlot(CompactHashMap map, int slot) {
         switch (slot) {
-            case -1:
-                return map.v1;
             case -2:
-                return map.v2;
-            case -3:
                 return map.v3;
+            case -1:
+                return map.v2;
+            case 0:
+                // Maps with fewer than 3 keys store their slot 0 in v1
+                if (map.klass.key2slot.size() <= 3) {
+                    return map.v1;
+                }
         }
-
         return ((Object[]) map.v1)[slot];
     }
 
@@ -104,20 +113,22 @@ abstract class CompactHashMapClass<K, V> {
         switch (slot) {
             case -1:
                 if (prevValue == REMOVED_OBJECT)
-                    prevValue = map.v1;
-                map.v1 = value;
-                break;
-            case -2:
-                if (prevValue == REMOVED_OBJECT)
                     prevValue = map.v2;
                 map.v2 = value;
                 break;
-            case -3:
+            case -2:
                 if (prevValue == REMOVED_OBJECT)
                     prevValue = map.v3;
                 map.v3 = value;
                 break;
             default:
+                if (slot == 0 && key2slot.size() <= 3) {
+                    if (prevValue == REMOVED_OBJECT)
+                        prevValue = map.v1;
+                    map.v1 = value;
+                    break;
+                }
+
                 Object[] array = (Object[]) map.v1;
                 if (prevValue == REMOVED_OBJECT)
                     prevValue = array[slot];
@@ -206,16 +217,26 @@ abstract class CompactHashMapClass<K, V> {
     public void serialize(final CompactHashMap<K, V> map, final ObjectOutputStream s) throws IOException {
         // We serialize default and non default values separately
         // That makes serialized representation more compact when several maps share defaults
-        int size = key2slot.size() - removedSlotsCount(map);
-        s.writeInt(size);
-
-        if (size > 0)
-            for (Pair<K, Integer> entry : key2slot) {
-                Object value = getValueFromSlot(map, entry.component2());
-                if (value == REMOVED_OBJECT) continue;
-                s.writeObject(unmaskNull(entry.component1()));
-                s.writeObject(value);
+        int ownKeys = key2slot.size();
+        s.writeInt(ownKeys);
+        // Write keys in the order they were added to the map, so deserialization reuses key2slot instances
+        if (ownKeys > 0) {
+            // Slots are always -2..(map.size-2), so we do not need sort 
+            final Object[] keys = new Object[ownKeys];
+            key2slot.forEach(new com.github.andrewoma.dexx.collection.Function<Pair<K, Integer>, Void>() {
+                public Void invoke(Pair<K, Integer> entry) {
+                    keys[entry.component2() + 2] = entry.component1();
+                    return null;
+                }
+            });
+            for (int i = 0; i < keys.length; i++) {
+                Object key = keys[i];
+                Object value = getValueFromSlot(map, i - 2);
+                s.writeObject(unmaskNull((K) key));
+                // We write REMOVED_OBJECT as well to keep the same key2slot when deserializing
+                s.writeObject(value == REMOVED_OBJECT ? RemovedObjectMarker.INSTANCE : value);
             }
+        }
 
         // Serialize default values as separate map
         s.writeObject(getDefaultValues());
@@ -228,7 +249,14 @@ abstract class CompactHashMapClass<K, V> {
         for (int i = 0; i < size; i++) {
             K key = (K) s.readObject();
             V value = (V) s.readObject();
-            map.put(key, value);
+            if (value == RemovedObjectMarker.INSTANCE) {
+                // We cannot use put(key, REMOVED_OBJECT) as the map would just ignore it
+                // We need to add an entry first so it allocates a new slot
+                map.put(key, null);
+                map.remove(key);
+            } else {
+                map.put(key, value);
+            }
         }
 
         Map<K, V> defaults = (Map<K, V>) s.readObject();

@@ -18,6 +18,7 @@ package vlsi.utils;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -85,7 +86,8 @@ public class CompactHashMapDefaultValues {
             readLock.unlock();
         }
 
-        Map<K, V> newMap = new HashMap<K, V>((int) ((prevDefaultValues.size() + 1) / 0.75f));
+        // Keep the order of entries in the default values, so we have a consistent subset of "default class"
+        Map<K, V> newMap = new LinkedHashMap<K, V>((int) ((prevDefaultValues.size() + 1) / 0.75f));
 
         newMap.putAll(prevDefaultValues);
 
