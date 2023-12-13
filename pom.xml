@@ -5,7 +5,7 @@
     <groupId>com.github.vlsi.compactmap</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <modules>
         <module>compactmap</module>
         <module>jol</module>
@@ -31,7 +31,7 @@
         <url>https://github.com/vlsi/compactmap</url>
         <connection>scm:git:https://github.com/vlsi/compactmap.git</connection>
         <developerConnection>scm:git:https://github.com/vlsi/compactmap.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>parent-2.0.1</tag>
   </scm>
 
     <developers>
