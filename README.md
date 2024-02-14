@@ -81,9 +81,7 @@ Sample
 
 License
 -------
-This library is distibuted under terms of GNU Lesser General Public License
-as published by the Free Software Foundation, either version 3 of the License,
-or (at your option) any later version.
+This library is distibuted under terms of Apache 2.0 License, see https://raw.githubusercontent.com/vlsi/compactmap/master/LICENSE
 
 Change log
 ----------
